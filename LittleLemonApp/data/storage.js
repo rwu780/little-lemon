@@ -1,4 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createContext } from 'react';
+
+const AuthContext = createContext();
+
+export function getContext() {
+    return AuthContext;
+}
+
 
 export async function saveData(key, value) {
     try {

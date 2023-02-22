@@ -5,7 +5,8 @@ import { COLORS } from '../assets/color';
 import font from '../assets/font';
 import * as db from '../data/storage'
 
-const Onboarding = ({navigation}) => {
+
+const Onboarding = () => {
 
     const logoImage = require('../assets/images/Logo.png')
 
@@ -13,13 +14,10 @@ const Onboarding = ({navigation}) => {
     const [email, setEmail] = React.useState('');
     const [isValidInput, setIsValidInputs] = React.useState(false);
 
-    const login = () => {
-        // db.saveData('login', true)
-        console.log("clicked")
-    }
+    const { signIn } = React.useContext(db.getContext())
 
-    const ret = () => {
-        db.getData('login')
+    const login = () => {
+        signIn({firstName, email})        
     }
 
     React.useEffect(() => {
