@@ -1,10 +1,10 @@
 import * as React from 'react';
-import {Image, Pressable, SafeAreaView, Text, TextInput, View} from 'react-native'
+import {Image, KeyboardAvoidingView, Pressable, SafeAreaView, ScrollView, Text, TextInput, View} from 'react-native'
 
 import { COLORS } from '../assets/color';
 import font from '../assets/font';
 import * as db from '../data/storage'
-
+import { validateEmail } from './utils';
 
 const Onboarding = () => {
 
@@ -17,19 +17,22 @@ const Onboarding = () => {
     const { signIn } = React.useContext(db.getContext())
 
     const login = () => {
+        db.userLogin();
         signIn({firstName, email})        
     }
 
     React.useEffect(() => {
-        if (email.length === 0 || firstName.length === 0) {
-            setIsValidInputs(false)
-        } else {
+        if (email.length !== 0 && firstName.length !== 0 && validateEmail(email)) {
             setIsValidInputs(true)
+        }
+        else {
+            setIsValidInputs(false)
         }
     }, [email, firstName])
     
     return(
         <SafeAreaView style={{flex: 1, backgroundColor: COLORS.light_grey}}>
+            <ScrollView style={{flex: 1}}>
             <View style={{
                 justifyContent: 'center',
                 alignItems: 'center',
@@ -86,7 +89,9 @@ const Onboarding = () => {
                     <Text style={[font.headingText, {color: (isValidInput ? COLORS.dark_green : COLORS.light_grey)}]}>Next</Text>
                 </Pressable>
             </View>
+            </ScrollView>
         </SafeAreaView>
+
     );
 
 }

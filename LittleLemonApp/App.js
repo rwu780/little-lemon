@@ -4,7 +4,6 @@ import Onboarding from './screens/Onboarding'
 import Profile from './screens/Profile';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as React from 'react'
 
 import * as db from './data/storage';
@@ -31,7 +30,7 @@ export default function App() {
           return {
             ...prevState,
             isSignout: true,
-            isOnboardingCompleted: false
+            isOnboardingCompleted: action.isOnboardingCompleted
           };
       }
     },
@@ -46,12 +45,10 @@ export default function App() {
       let isLogin;
 
       try {
-        isLogin = await db.getData('login');
+        isLogin = await db.isUserLogin();
       } catch (e) {
         console.log(e)
       }
-      console.log("abc", isLogin)
-      isLogin = (!isLogin.length) ? true : false;
 
       dispatch({ type: 'RESTORE_STATE', isOnboardingCompleted: isLogin });
     };
@@ -64,18 +61,25 @@ export default function App() {
     () => ({
       signIn: async (data) => {
         dispatch({ type: 'SIGN_IN', isOnboardingCompleted: true })
+        await db.saveProfile({
+          firstName: data.firstName,
+          email: data.email
+          })
       },
-      signOut: () => {
-        dispatch({ type: 'SIGN_OUT' });
+      signOut: async () => {
+        await db.clearStorage();
+        dispatch({ type: 'SIGN_OUT', isOnboardingCompleted: false });
+
       },
     }),
     []
   )
+
   return (
     <AuthContext.Provider value={authContext}>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerTitleAlign: 'center' }}>
-          {!state.isOnboardingCompleted
+          {state.isOnboardingCompleted
             ? (
 
               <Stack.Screen name="Profile" component={Profile} options={{

@@ -27,6 +27,33 @@ export async function getData(key) {
     return data;
 }
 
+export async function userLogin() {
+    await saveData('login', true);
+}
+
+export async function isUserLogin() {
+    let isLogin = await getData('login');
+    if (!isLogin.length) {
+        return false;
+    }
+    isLogin = JSON.parse(isLogin);
+    if (isLogin) {
+        return true
+    } else {
+        return false
+    }
+}
+
+export async function saveProfile(profile) {
+    console.log("db save", profile)
+    await saveData('profile', profile)
+}
+
+export async function getProfile() {
+    let storeProfile = await getData('profile');
+    return JSON.parse(storeProfile)
+}
+
 export async function clearStorage() {
     try {
         await AsyncStorage.clear();
