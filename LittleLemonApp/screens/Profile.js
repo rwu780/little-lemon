@@ -8,9 +8,9 @@ import Checkbox from 'expo-checkbox';
 import * as ImagePicker from 'expo-image-picker';
 import { validateEmail } from './utils';
 
-export default function Profile() {
+export default function Profile({navigation}) {
 
-    const { signOut } = React.useContext(db.getContext())
+    const { signOut, update } = React.useContext(db.getContext())
 
     const [profile, setProfile] = React.useState({
         firstName: '',
@@ -29,7 +29,6 @@ export default function Profile() {
             ...prevState,
             [key]: value,
         }));
-        console.log("qqqq", profile)
     }
 
     const updateCheckbox = (key) => {
@@ -48,7 +47,16 @@ export default function Profile() {
             db.saveProfile(profile);
             Alert.alert(
                 '',
-                'Your information is updated'
+                'Your information is updated',
+                [
+                    {
+                        text: 'OK', onPress: () => {
+                            update(profile)
+                            navigation.goBack()
+                            
+                        }
+                    }
+                ]
             )
         } else {
             Alert.alert('', 'You did not fill out the require information')

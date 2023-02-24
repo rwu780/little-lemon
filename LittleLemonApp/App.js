@@ -1,17 +1,21 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { Image, Pressable } from 'react-native';
 import Onboarding from './screens/Onboarding'
 import Profile from './screens/Profile';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import Home from './screens/Home'
+import { NavigationContainer, useIsFocused, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react'
 
 import * as db from './data/storage';
+import { COLORS } from './assets/color';
 
 const Stack = createNativeStackNavigator();
 const AuthContext = db.getContext();
 
 export default function App() {
+
+  const [profile, setProfile] = React.useState({});
+
   const [state, dispatch] = React.useReducer(
     (prevState, action) => {
       switch (action.type) {
@@ -21,6 +25,12 @@ export default function App() {
             isOnboardingCompleted: action.isOnboardingCompleted
           }
         case 'SIGN_IN':
+          return {
+            ...prevState,
+            isSignout: false,
+            isOnboardingCompleted: action.isOnboardingCompleted,
+          };
+        case 'PROFILE_UPDATE':
           return {
             ...prevState,
             isSignout: false,
@@ -46,6 +56,11 @@ export default function App() {
 
       try {
         isLogin = await db.isUserLogin();
+
+        if (isLogin) {
+          let storedProfile = await db.getProfile();
+          setProfile(storedProfile);
+        }
       } catch (e) {
         console.log(e)
       }
@@ -64,13 +79,17 @@ export default function App() {
         await db.saveProfile({
           firstName: data.firstName,
           email: data.email
-          })
+        })
       },
       signOut: async () => {
         await db.clearStorage();
         dispatch({ type: 'SIGN_OUT', isOnboardingCompleted: false });
 
       },
+      update: async (data) => {
+        setProfile(data)
+        dispatch({type: 'PROFILE_UPDATE', isOnboardingCompleted: true})
+      }
     }),
     []
   )
@@ -81,10 +100,15 @@ export default function App() {
         <Stack.Navigator screenOptions={{ headerTitleAlign: 'center' }}>
           {state.isOnboardingCompleted
             ? (
-
-              <Stack.Screen name="Profile" component={Profile} options={{
-                headerTitle: (props) => <LogoTitle />
-              }} />
+              <>
+                <Stack.Screen name='Home' component={Home} options={{
+                  headerTitle: (props) => <LogoTitle />,
+                  headerRight: () => <AvatarLogo profileImage={profile.image} />
+                }} />
+                <Stack.Screen name="Profile" component={Profile} options={{
+                  headerTitle: (props) => <LogoTitle />
+                }} />
+              </>
 
             )
             : (<Stack.Screen name='Onboarding' component={Onboarding} />)
@@ -97,8 +121,35 @@ export default function App() {
 
 const LogoTitle = () => {
   const logoImage = require('./assets/images/Logo.png')
+
+
+  const navigation = useNavigation();
+
   return (
     <Image source={logoImage} style={{ width: '60%', height: undefined, aspectRatio: 185 / 40 }} />
+  )
+}
+
+const AvatarLogo = ({profileImage}) => {
+
+  const avatarImage = require('./assets/images/Profile.png')
+  const avatarImageSpec = 40;
+
+  const navigation = useNavigation();
+
+  return (
+    <Pressable onPress={
+      () => navigation.navigate('Profile')
+    }>
+      <Image source={(profileImage !== "") ? { uri: profileImage } : avatarImage} style={{
+        width: avatarImageSpec,
+        height: avatarImageSpec,
+        borderRadius: avatarImageSpec / 2,
+        overflow: 'hidden',
+        borderWidth: 3,
+        borderColor: COLORS.dark_green
+      }} />
+    </Pressable>
   )
 }
 

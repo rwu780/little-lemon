@@ -10,7 +10,7 @@ const weight = {
 
 export default StyleSheet.create({
     titleText: {
-        fontSize: 64,
+        fontSize: 50,
         fontWeight: weight.Medium
     },
     subTitleText: {
@@ -40,7 +40,6 @@ export default StyleSheet.create({
     },
     paragraphText: {
         fontSize: 18,
-        lineHeight: 1.5
     },
     highlightText: {
         fontWeight: 16,
